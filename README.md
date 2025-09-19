@@ -43,14 +43,7 @@ Please ensure all connections are secure before powering on the devices.
 
 ## Testing the Gateway
 
-This project includes a powerful Python-based command-line client for testing and interaction, located in the `/test_client` directory.
-
-### Features
-
--   **Interactive Mode**: Control the clock in real-time with simple commands.
--   **Detailed Logging**: See all BLE communication (commands, responses, events) in a color-coded interface.
-
-For detailed instructions on how to set up and use the test client, please refer to its dedicated README file:
+This project includes a Python-based command-line client for testing and interaction, located in the `/test_client` directory.
 
 ## Project Structure
 
