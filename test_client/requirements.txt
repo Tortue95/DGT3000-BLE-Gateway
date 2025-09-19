@@ -1,0 +1,8 @@
+# DGT3000 BLE Gateway Test Client Dependencies
+
+# Core BLE communication
+bleak>=1.1.1
+
+# CLI interface and user interaction
+rich>=14.1.0
+prompt_toolkit>=3.0.52

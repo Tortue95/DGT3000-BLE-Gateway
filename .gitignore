@@ -1,0 +1,14 @@
+.pio
+.vscode
+*.pyc
+**/__pycache__
+**/test_scenarios.py
+**/.venv
+.cache
+test_client/.dgt3000_client_history
+test_client/test_results.json
+ressources_to_help_dev
+backup
+.vscode
+compile_commands.json
+esp-web-tools
