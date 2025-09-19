@@ -5,7 +5,7 @@ This document describes the Bluetooth Low Energy (BLE) protocol for the DGT3000 
 
 **BLE Device Name**: `DGT3000-Gateway`
 
-**Communication**: All communication, except for status and version reads, is handled through JSON strings written to and notified from specific characteristics.
+**Communication**: All communication, except for protocol version reads, is handled through JSON strings written to and notified from specific characteristics.
 
 ## 2. BLE Service and Characteristics
 The gateway exposes a single primary service with several characteristics to handle communication.
@@ -188,19 +188,6 @@ Requests the current time from both clocks. The result is sent in a `command_res
 {
   "command": "getTime",
   "id": "cmd-007"
-}
-```
-
-#### `getStatus`
-Requests the current status of the gateway and clock. The result is sent in a `command_response`. This command does not require an active connection to the DGT3000 clock itself.
-
-**Params**: None.
-
-**Example**:
-```json
-{
-  "command": "getStatus",
-  "id": "cmd-008"
 }
 ```
 

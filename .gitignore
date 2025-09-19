@@ -12,3 +12,4 @@ backup
 .vscode
 compile_commands.json
 esp-web-tools
+.env_git

@@ -33,7 +33,7 @@ Follow the on-screen instructions on the website to flash the firmware onto your
 
 To connect your ESP32-S3-Zero to the DGT3000's jack, follow the wiring diagram below:
 
-![wiring diagram](doc/Wire_Schemas.png)
+<img src="doc/Wire_Schemas.png" width="40%">
 
 *   **ESP32 Pin 5 and 6 (SCL)** connects to the **SCL** line of the 3.5mm jack.
 *   **ESP32 Pin 7 and 8 (SDA)** connects to the **SDA** line of the 3.5mm jack.
@@ -43,7 +43,14 @@ Please ensure all connections are secure before powering on the devices.
 
 ## Testing the Gateway
 
-This project includes a Python-based command-line client for testing and interaction, located in the `/test_client` directory.
+This project includes a powerful Python-based command-line client for testing and interaction, located in the `/test_client` directory.
+
+### Features
+
+-   **Interactive Mode**: Control the clock in real-time with simple commands.
+-   **Detailed Logging**: See all BLE communication (commands, responses, events) in a color-coded interface.
+
+For detailed instructions on how to set up and use the test client, please refer to its dedicated README file:
 
 ## Project Structure
 
@@ -70,4 +77,4 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
 *This project was developed by Tortue, 2025.*
 
-[![Buy Me A Coffee](https://media.giphy.com/media/GNBCVMv6XobnMUMYJG/giphy.gif)](https://buymeacoffee.com/tortue)
+[![Buy Me A Coffee](https://media.giphy.com/media/RETzc1mj7HpZPuNf3e/giphy.gif)](https://buymeacoffee.com/tortue)
