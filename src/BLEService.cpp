@@ -302,6 +302,7 @@ void DGT3000BLEService::updateStatusCache() {
     if (queueManager) {
         statusDoc["rawCmdQueueDepth"] = queueManager->getRawCommandQueueDepth();
         statusDoc["evtQueueDepth"] = queueManager->getEventQueueDepth();
+        statusDoc["respQueueDepth"] = queueManager->getResponseQueueDepth();
         statusDoc["queuesHealthy"] = queueManager->isHealthy();
     }
     

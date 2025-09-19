@@ -214,7 +214,6 @@ class DGT3000BLEClient:
         cmd_data = {
             "id": command_id,
             "command": command,
-            "timestamp": int(time.time() * 1000)
         }
         
         if params:
