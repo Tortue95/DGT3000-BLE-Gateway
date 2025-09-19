@@ -77,4 +77,4 @@ This project is licensed under the GNU General Public License v3.0. See the [LIC
 
 *This project was developed by Tortue, 2025.*
 
-[![Buy Me A Coffee](https://media.giphy.com/media/RETzc1mj7HpZPuNf3e/giphy.gif)](https://buymeacoffee.com/tortue)
+[![Buy Me A Coffee](https://media.giphy.com/media/GNBCVMv6XobnMUMYJG/giphy.gif)](https://buymeacoffee.com/tortue)
