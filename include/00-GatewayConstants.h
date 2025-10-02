@@ -95,7 +95,7 @@ constexpr const char* BLE_PROTOCOL_VERSION = "1.0";
 /**
  * @brief Current version of the DGT3000 BLE Gateway application.
  */
-constexpr const char* GATEWAY_APP_VERSION = "0.2-beta";
+constexpr const char* GATEWAY_APP_VERSION = "0.3-beta";
 
 // =============================================================================
 // BLE SERVICE AND CHARACTERISTIC UUIDS
