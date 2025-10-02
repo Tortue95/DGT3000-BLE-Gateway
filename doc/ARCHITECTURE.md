@@ -46,13 +46,25 @@ This allows for hot-plugging the DGT3000 clock while a BLE client remains connec
 
 ## 4. Status LED Behavior
 
-The onboard NeoPixel LED provides at-a-glance visual feedback of the gateway's current status:
+The firmware provides two configurable options for visual status feedback, which can be enabled or disabled independently in `include/00-GatewayConstants.h`.
+
+### Onboard NeoPixel (ESP32-S3-Zero)
+
+The onboard NeoPixel LED provides at-a-glance, color-coded feedback of the gateway's current status:
 
 -   **Slow Blinking Blue**: The gateway is powered on and advertising, waiting for a BLE client to connect.
 -   **Solid Blue**: A BLE client has connected, but the gateway has not yet successfully connected to and configured the DGT3000 clock.
--   **Solid Green**: All systems are go. A BLE client is connected, and the gateway has full control over the DGT3000 clock. The system is ready for commands.
+-   **Solid Green (Brightness-Adjustable)**: All systems are go. A BLE client is connected, and the gateway has full control over the DGT3000 clock. The system is ready for commands.
 
-This simple color-coding allows for quick and easy troubleshooting of the system's state.
+### Optional External LED
+
+For custom enclosures or different hardware, a simple, single-color external LED can be used (defaulting to GPIO 11). It provides status information through different blinking patterns:
+
+-   **Slow Blinking**: The gateway is waiting for a BLE client to connect.
+-   **Fast Blinking**: A BLE client is connected, but the DGT3000 clock is not yet configured.
+-   **Solid On (Brightness-Adjustable)**: The gateway is fully connected to both the BLE client and the DGT clock.
+
+This dual-LED approach allows for both easy-to-read color-coding with the NeoPixel and flexible integration with a standard external LED.
 
 ## 5. Known Limitations
 

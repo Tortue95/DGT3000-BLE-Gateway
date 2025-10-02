@@ -33,19 +33,18 @@ enum LedState {
 
 /**
  * @class LedManager
- * @brief Manages the behavior of the NeoPixel status LED.
+ * @brief Manages the behavior of the status LEDs (NeoPixel and/or simple LED).
  */
 class LedManager : public esp32m::SimpleLoggable {
 public:
     /**
      * @brief Constructs a new LedManager.
-     * @param pin The GPIO pin the NeoPixel is connected to.
-     * @param num_pixels The number of pixels in the strip (usually 1).
+     * Configuration is read from 00-GatewayConstants.h.
      */
-    LedManager(int pin = LED_NEOPIXEL_PIN, int num_pixels = 1);
+    LedManager();
     
     /**
-     * @brief Initializes the NeoPixel library.
+     * @brief Initializes the LED hardware (NeoPixel and/or simple LED).
      */
     void initialize();
     
@@ -68,16 +67,31 @@ public:
     void update();
 
 private:
-    Adafruit_NeoPixel pixels; ///< The NeoPixel driver instance.
-    LedState current_state;   ///< The current state of the LED.
-    unsigned long last_update;///< Timestamp of the last blink toggle.
-    bool blink_status;        ///< The current on/off status for blinking.
+    // NeoPixel members
+    Adafruit_NeoPixel* pixels; ///< The NeoPixel driver instance.
+
+    // Simple LED members
+    bool simple_led_on;                 ///< Current on/off state for the simple LED.
+    int simple_led_connected_duty_cycle;///< Calculated duty cycle for solid brightness in connected state.
+    int simple_led_blink_duty_cycle;    ///< Calculated duty cycle for blinking brightness.
+
+    // General members
+    LedState current_state;   ///< The current state of the LED system.
+    
+    // Blink state members
+    unsigned long neopixel_last_update; ///< Timestamp of the last NeoPixel blink toggle.
+    bool neopixel_blink_status;         ///< The current on/off status for NeoPixel blinking.
+    unsigned long simple_led_last_update; ///< Timestamp of the last simple LED blink toggle.
 
     /**
-     * @brief Sets the physical color of the NeoPixel.
-     * @param color The 24-bit color value (e.g., 0x0000FF for blue).
+     * @brief Updates the NeoPixel based on the current state.
      */
-    void setPixelColor(uint32_t color);
+    void updateNeoPixel();
+
+    /**
+     * @brief Updates the simple LED based on the current state.
+     */
+    void updateSimpleLed();
 };
 
 #endif // LED_MANAGER_H

@@ -109,7 +109,7 @@ bool initializeSystem() {
     
     // Step 5: Initialize the LED Manager for status indication.
     log_d("Step 5: Initializing LED Manager...");
-    g_ledManager = std::unique_ptr<LedManager>(new LedManager(LED_NEOPIXEL_PIN, 1));
+    g_ledManager = std::unique_ptr<LedManager>(new LedManager());
     if (!g_ledManager) {
         log_e("ERROR: Failed to create LED Manager");
         // This is not a fatal error, so we continue.

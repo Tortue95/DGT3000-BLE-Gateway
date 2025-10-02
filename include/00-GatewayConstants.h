@@ -47,9 +47,41 @@ constexpr int DGT3000_SLAVE_SCL_PIN = 6;
 // =============================================================================
 
 /**
+ * @brief Enable or disable the NeoPixel LED.
+ */
+constexpr bool NEOPIXEL_LED_ENABLED = true;
+
+/**
  * @brief GPIO pin connected to the NeoPixel LED for status indication.
  */
 constexpr int LED_NEOPIXEL_PIN = 21;
+
+/**
+ * @brief General brightness for the NeoPixel LED (0-255).
+ */
+constexpr int NEOPIXEL_GENERAL_BRIGHTNESS = 50;
+
+/**
+ * @brief Enable or disable the simple external LED.
+ */
+constexpr bool SIMPLE_LED_ENABLED = true;
+
+/**
+ * @brief GPIO pin for the simple external LED.
+ */
+constexpr int SIMPLE_LED_PIN = 11;
+
+/**
+ * @brief Brightness of the simple LED when blinking (percent, 0-100).
+ */
+constexpr int SIMPLE_LED_BLINK_BRIGHTNESS_PERCENT = 100;
+
+/**
+ * @brief Brightness of the LEDs when in the fully connected state (percent, 0-100).
+ * This applies to both the NeoPixel (green) and the simple LED.
+ */
+constexpr int CONNECTED_STATE_BRIGHTNESS_PERCENT = 25;
+
 
 // =============================================================================
 // BLE PROTOCOL VERSION and FW VERSION

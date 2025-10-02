@@ -16,23 +16,65 @@
 using namespace esp32m;
 
 // Constants for LED behavior
-#define BLINK_INTERVAL 500 // Blink interval in milliseconds
+#define BLINK_INTERVAL_SLOW 500 // Slow blink interval for simple LED (ms)
+#define BLINK_INTERVAL_FAST 250  // Fast blink interval for simple LED (ms)
+#define NEOPIXEL_BLINK_INTERVAL 500 // Blink interval for NeoPixel (ms)
 
 // Define colors in GRB format (as required by NeoPixel library)
 static constexpr uint32_t COLOR_BLUE  = 0x0000FF;
-static constexpr uint32_t COLOR_GREEN = 0x002200;
+static constexpr uint32_t COLOR_GREEN = 0x00FF00;
 static constexpr uint32_t COLOR_OFF   = 0x000000;
 
-LedManager::LedManager(int pin, int num_pixels)
+// PWM constants for Simple LED
+static constexpr int SIMPLE_LED_PWM_CHANNEL = 0;
+static constexpr int SIMPLE_LED_PWM_FREQ = 5000;
+static constexpr int SIMPLE_LED_PWM_RESOLUTION = 8;
+
+LedManager::LedManager()
     : SimpleLoggable("led"),
-      pixels(num_pixels, pin, NEO_GRB + NEO_KHZ800),
+      pixels(nullptr),
+      simple_led_on(false),
+      simple_led_connected_duty_cycle(0),
+      simple_led_blink_duty_cycle(0),
       current_state(LED_STATE_INITIALIZING),
-      last_update(0),
-      blink_status(false) {}
+      neopixel_last_update(0),
+      neopixel_blink_status(false),
+      simple_led_last_update(0) {}
 
 void LedManager::initialize() {
-    pixels.begin();
-    pixels.setBrightness(50); // Set a moderate brightness to avoid being too bright.
+    if (NEOPIXEL_LED_ENABLED) {
+        pixels = new Adafruit_NeoPixel(1, LED_NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
+        if (pixels) {
+            pixels->begin();
+            pixels->setBrightness(NEOPIXEL_GENERAL_BRIGHTNESS);
+            logI("NeoPixel LED enabled on pin %d", LED_NEOPIXEL_PIN);
+        } else {
+            logE("Failed to allocate NeoPixel memory");
+        }
+    } else {
+        logI("NeoPixel LED is disabled.");
+    }
+
+    if (SIMPLE_LED_ENABLED) {
+        // Configure PWM for the simple LED
+        ledcSetup(SIMPLE_LED_PWM_CHANNEL, SIMPLE_LED_PWM_FREQ, SIMPLE_LED_PWM_RESOLUTION);
+        ledcAttachPin(SIMPLE_LED_PIN, SIMPLE_LED_PWM_CHANNEL);
+
+        // Calculate duty cycle from percentage for the connected state
+        simple_led_connected_duty_cycle = (CONNECTED_STATE_BRIGHTNESS_PERCENT * 255) / 100;
+        if (simple_led_connected_duty_cycle < 0) simple_led_connected_duty_cycle = 0;
+        if (simple_led_connected_duty_cycle > 255) simple_led_connected_duty_cycle = 255;
+
+        // Calculate duty cycle for blinking
+        simple_led_blink_duty_cycle = (SIMPLE_LED_BLINK_BRIGHTNESS_PERCENT * 255) / 100;
+        if (simple_led_blink_duty_cycle < 0) simple_led_blink_duty_cycle = 0;
+        if (simple_led_blink_duty_cycle > 255) simple_led_blink_duty_cycle = 255;
+
+        logI("Simple LED enabled on pin %d", SIMPLE_LED_PIN);
+    } else {
+        logI("Simple LED is disabled.");
+    }
+    
     setState(LED_STATE_WAITING_FOR_CONNECTION);
     logD("LED Manager initialized");
 }
@@ -41,9 +83,12 @@ void LedManager::setState(LedState new_state) {
     if (new_state != current_state) {
         logD("LED State changing from %d to %d", current_state, new_state);
         current_state = new_state;
-        last_update = 0;    // Reset blink timer on state change.
-        blink_status = false; // Ensure blink starts from a known state.
-        update();           // Apply the new state immediately.
+        // Reset timers and blink statuses on state change
+        neopixel_last_update = 0;
+        simple_led_last_update = 0;
+        neopixel_blink_status = false;
+        simple_led_on = false;
+        update(); // Apply the new state immediately.
     }
 }
 
@@ -52,38 +97,89 @@ LedState LedManager::getState() const {
 }
 
 void LedManager::update() {
+    if (NEOPIXEL_LED_ENABLED && pixels) {
+        updateNeoPixel();
+    }
+    if (SIMPLE_LED_ENABLED) {
+        updateSimpleLed();
+    }
+}
+
+void LedManager::updateNeoPixel() {
     unsigned long current_millis = millis();
+    uint32_t color = COLOR_OFF;
 
     switch (current_state) {
         case LED_STATE_WAITING_FOR_CONNECTION:
-            // Slow blinking blue to indicate waiting for a BLE client.
-            if (current_millis - last_update > BLINK_INTERVAL) {
-                last_update = current_millis;
-                blink_status = !blink_status;
-                setPixelColor(blink_status ? COLOR_BLUE : COLOR_OFF);
+            // Slow blinking blue
+            if (current_millis - neopixel_last_update > NEOPIXEL_BLINK_INTERVAL) {
+                neopixel_last_update = current_millis;
+                neopixel_blink_status = !neopixel_blink_status;
             }
+            color = neopixel_blink_status ? COLOR_BLUE : COLOR_OFF;
             break;
 
         case LED_STATE_CLIENT_CONNECTED:
-            // Solid blue when a BLE client is connected but DGT is not yet ready.
-            setPixelColor(COLOR_BLUE);
+            // Solid blue
+            color = COLOR_BLUE;
             break;
 
         case LED_STATE_DGT_CONFIGURED:
-            // Solid green when both BLE and DGT clock are connected and configured.
-            setPixelColor(COLOR_GREEN);
+            {
+                // Solid green with adjusted brightness
+                uint8_t green_value = 255 * (static_cast<float>(CONNECTED_STATE_BRIGHTNESS_PERCENT) / 100.0f);
+                color = pixels->Color(0, green_value, 0);
+            }
             break;
 
         case LED_STATE_INITIALIZING:
         case LED_STATE_OFF:
         default:
-            // Turn the LED off in default or off states.
-            setPixelColor(COLOR_OFF);
+            // LED off
+            color = COLOR_OFF;
             break;
+    }
+
+    if (pixels->getPixelColor(0) != color) {
+        pixels->setPixelColor(0, color);
+        pixels->show();
     }
 }
 
-void LedManager::setPixelColor(uint32_t color) {
-    pixels.setPixelColor(0, color);
-    pixels.show();
+void LedManager::updateSimpleLed() {
+    unsigned long current_millis = millis();
+    int blink_interval = 0;
+
+    switch (current_state) {
+        case LED_STATE_WAITING_FOR_CONNECTION:
+            // Slow blinking
+            blink_interval = BLINK_INTERVAL_SLOW;
+            break;
+
+        case LED_STATE_CLIENT_CONNECTED:
+            // Fast blinking
+            blink_interval = BLINK_INTERVAL_FAST;
+            break;
+
+        case LED_STATE_DGT_CONFIGURED:
+            // Solid on with specified brightness
+            ledcWrite(SIMPLE_LED_PWM_CHANNEL, simple_led_connected_duty_cycle);
+            return; // Exit, no blinking logic needed
+
+        case LED_STATE_INITIALIZING:
+        case LED_STATE_OFF:
+        default:
+            // Turn the LED off
+            ledcWrite(SIMPLE_LED_PWM_CHANNEL, 0);
+            return; // Exit, no blinking logic needed
+    }
+
+    // Handle blinking logic
+    if (blink_interval > 0) {
+        if (current_millis - simple_led_last_update > blink_interval) {
+            simple_led_last_update = current_millis;
+            simple_led_on = !simple_led_on;
+            ledcWrite(SIMPLE_LED_PWM_CHANNEL, simple_led_on ? simple_led_blink_duty_cycle : 0);
+        }
+    }
 }

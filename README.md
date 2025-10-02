@@ -12,7 +12,7 @@ This gateway handles the complex dual-I2C communication required by the clock an
 -   **Dual-Core Architecture**: Utilizes FreeRTOS tasks to separate BLE communication (Core 1) from the time-sensitive I2C communication (Core 0) for robust performance.
 -   **Status and Diagnostics**: Provides a status characteristic to monitor the gateway's health, including connection states, memory usage, and more.
 -   **Auto-Recovery**: Includes logic to automatically attempt reconnection with the DGT clock if the connection is lost.
--   **Status LED**: Provides visual feedback on the operational state (waiting for connection, client connected, DGT ready).
+-   **Status LED**: Provides visual feedback on the operational state using the built-in NeoPixel on the ESP32-S3-Zero. It also supports an optional external LED on GPIO 11 (by default) for more flexible integration.
 
 ## Hardware Requirements
 
