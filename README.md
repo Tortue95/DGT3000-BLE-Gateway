@@ -45,6 +45,15 @@ Please ensure all connections are secure before powering on the devices.
 
 This project includes a Python-based command-line client for testing and interaction, located in the `/test_client` directory.
 
+## Displaying Firmware Version
+
+To check the currently installed firmware and protocol version directly on the DGT3000 clock, follow these steps:
+
+1.  Power on the gateway and ensure it is connected to the DGT3000 clock.
+2.  Wait for the clock to display the `BT   WAIT` message, which indicates it is waiting for a Bluetooth client.
+3.  Press the `+` (plus) button on the DGT3000 clock.
+4.  The clock screen will briefly display the version information (e.g., `1.0-0.5beta`).
+
 ## Project Structure
 
 -   `src/`: Contains the main implementation files for the different managers and the main application logic.

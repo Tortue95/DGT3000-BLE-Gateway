@@ -13,6 +13,7 @@
  */
 
 #include "I2CTaskManager.h"
+#include "00-GatewayConstants.h" // For version constants
 #include <esp_task_wdt.h>
 
 using namespace esp32m;
@@ -586,6 +587,14 @@ void I2CTaskManager::generateButtonEvent() {
             _buttonMonitoring.buttonRepeatActive = false;
             _buttonMonitoring.buttonRepeatCount = 0;
             logI("Button event: %s (code: 0x%02X)", buttonName, button);
+
+            // Displaying firmware version on DGT screen when no client connected
+            if (button == DGT_BUTTON_PLUS && !_bleConnected) {
+                logI("Displaying firmware version on DGT screen.");
+                char versionString[12];
+                snprintf(versionString, sizeof(versionString), "%s-%s", BLE_PROTOCOL_VERSION, GATEWAY_APP_VERSION);
+                _dgt3000->displayText(versionString); // Display for 2 seconds
+            }
         }
     }
 }
