@@ -17,7 +17,7 @@ import time
 import uuid
 from asyncio import Event
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import shlex
 
@@ -51,7 +51,6 @@ class DGT3000BLEClient:
         self.client: Optional[BleakClient] = None
         self.device_address: Optional[str] = None
         self.connected = False
-        self.dgt_configured_event = Event()
         self.command_responses: Dict[str, Event] = {}
         self.response_data: Dict[str, Dict] = {}
         self.stats = {
@@ -61,7 +60,7 @@ class DGT3000BLEClient:
             'connection_time': None
         }
     
-    async def scan_devices(self, timeout: float = 10.0) -> list:
+    async def scan_devices(self, timeout: float = 15.0) -> list:
         """Scan for DGT3000 Gateway devices."""
         console.print(f"[blue]Scanning for BLE devices (timeout: {timeout}s)...[/blue]")
         
@@ -111,21 +110,9 @@ class DGT3000BLEClient:
             # Subscribe to event notifications
             await self.client.start_notify(EVENT_CHAR_UUID, self._event_notification_handler)
             
-            # Wait for the DGT3000 to be configured by listening for the connectionStatus event
-            console.print("[blue]Waiting for DGT3000 to be configured...[/blue]")
-            try:
-                await asyncio.wait_for(self.dgt_configured_event.wait(), timeout=5.0)
-                console.print("[green]✅ DGT3000 is configured (event received).[/green]")
-                
-                # Show text and beep on DGT 3000
-                await self.display_text(" Connected", 2)
-                console.print(f"[green]Connected to DGT3000 Gateway at {address}[/green]")
+            console.print(f"[green]✅ Connected to DGT3000 Gateway at {address}. Ready for commands.[/green]")
 
-            except asyncio.TimeoutError:
-                console.print("[red]❌ Timed out waiting for DGT3000 configuration event. Aborting connection.[/red]")
-                return False
-
-            return True # Only return True if all steps (BLE, protocol, DGT config) are successful
+            return True
             
         except Exception as e:
             console.print(f"[red]Connection failed: {e}[/red]")
@@ -177,10 +164,6 @@ class DGT3000BLEClient:
                 status_icon = "🟢" if connected and configured else "🟡" if connected else "🔴"
                 console.print(f"[blue]{status_icon} DGT Connection Status: {'Connected & Configured' if connected and configured else 'Connected' if connected else 'Disconnected'}[/blue]")
                 
-                # If we receive the event that the DGT is configured, set the asyncio event
-                if configured:
-                    self.dgt_configured_event.set()
-                
             elif event_type == 'error':
                 error_code = event_data.get('errorCode', 0)
                 error_message = event_data.get('errorMessage', 'Unknown error')
@@ -211,7 +194,7 @@ class DGT3000BLEClient:
         if not command_id:
             command_id = str(uuid.uuid4())[:8]
         
-        cmd_data = {
+        cmd_data: Dict[str, Any] = {
             "id": command_id,
             "command": command,
         }

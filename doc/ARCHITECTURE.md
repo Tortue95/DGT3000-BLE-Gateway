@@ -14,24 +14,26 @@ The gateway's firmware is built on a dual-core architecture using FreeRTOS tasks
 
 ## 2. Connection and Power Lifecycle
 
-The gateway is designed to be power-efficient and responsive, managing the DGT3000's power state based on the BLE connection status.
+The gateway follows a specific startup and connection sequence to ensure that it is only discoverable by clients when it is fully operational.
 
-### On BLE Client Connect
+1.  **Power On & DGT Connection**:
+    *   Upon booting, the ESP32 immediately enters a loop where it continuously tries to connect to and configure the DGT3000 clock.
+    *   During this phase, **BLE advertising is disabled**. The gateway is not visible to BLE clients.
+    *   The gateway can power on the DGT3000 clock via the I2C lines, even if the clock is physically off.
 
-1.  A BLE client connects to the gateway.
-2.  The `onBLEConnected()` callback is triggered.
-3.  This immediately initiates the `initializeDGT3000()` sequence in the `I2CTaskManager`.
-4.  The gateway sends a "wake-up" signal to the DGT3000 clock. **Even if the clock is physically off, the gateway can power it on** via the I2C communication lines.
-5.  The gateway then runs the full configuration sequence to take central control of the clock.
+2.  **DGT Connected & Waiting for Client**:
+    *   Once the gateway successfully connects to and configures the DGT3000, it starts BLE advertising.
+    *   The gateway is now discoverable as `DGT3000-Gateway` and is ready to accept a client connection.
 
-### On BLE Client Disconnect
+3.  **BLE Client Connects**:
+    *   A BLE client connects to the gateway.
+    *   The system is now fully active and ready to process commands.
 
-1.  The BLE client disconnects.
-2.  The `onBLEDisconnected()` callback is triggered.
-3.  The gateway sends a **power-off command** to the DGT3000 clock.
-4.  After cleaning up resources, the **ESP32 automatically reboots**. This ensures the system returns to a clean, predictable state, ready for a new connection.
+4.  **BLE Client Disconnects**:
+    *   When the client disconnects, the gateway sends a power-off command to the DGT3000.
+    *   The **ESP32 automatically reboots**. This ensures the system returns to a clean, predictable state, ready for the next session, starting again at step 1.
 
-This lifecycle ensures that the DGT3000 clock is only powered on when a client is actively connected, saving battery on the clock.
+This lifecycle ensures that a client can only connect when the gateway has a valid, active connection to the DGT3000, preventing connection errors and improving user experience.
 
 ## 3. Automatic I2C Reconnection
 
@@ -52,16 +54,16 @@ The firmware provides two configurable options for visual status feedback, which
 
 The onboard NeoPixel LED provides at-a-glance, color-coded feedback of the gateway's current status:
 
--   **Slow Blinking Blue**: The gateway is powered on and advertising, waiting for a BLE client to connect.
--   **Solid Blue**: A BLE client has connected, but the gateway has not yet successfully connected to and configured the DGT3000 clock.
+-   **Fast Blinking Blue**: The gateway is trying to connect to the DGT3000 clock. BLE advertising is off.
+-   **Slow Blinking Blue**: The gateway is connected to the DGT3000 and is now advertising, waiting for a BLE client to connect.
 -   **Solid Green (Brightness-Adjustable)**: All systems are go. A BLE client is connected, and the gateway has full control over the DGT3000 clock. The system is ready for commands.
 
 ### Optional External LED
 
 For custom enclosures or different hardware, a simple, single-color external LED can be used (defaulting to GPIO 11). It provides status information through different blinking patterns:
 
--   **Slow Blinking**: The gateway is waiting for a BLE client to connect.
--   **Fast Blinking**: A BLE client is connected, but the DGT3000 clock is not yet configured.
+-   **Fast Blinking**: The gateway is trying to connect to the DGT3000 clock.
+-   **Slow Blinking**: The gateway is connected to the DGT3000 and is waiting for a BLE client.
 -   **Solid On (Brightness-Adjustable)**: The gateway is fully connected to both the BLE client and the DGT clock.
 
 This dual-LED approach allows for both easy-to-read color-coding with the NeoPixel and flexible integration with a standard external LED.

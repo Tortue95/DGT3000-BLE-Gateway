@@ -54,8 +54,8 @@ public:
     
     // Connection state
     bool deviceConnected;
-    bool oldDeviceConnected;
     uint32_t connectionTime;
+    bool _isAdvertising;
     
     // Dependencies
     QueueManager* queueManager;
@@ -115,6 +115,22 @@ public:
      * @return Connection duration in milliseconds.
      */
     uint32_t getConnectionTime() const { return connectionTime; }
+
+    /**
+     * @brief Starts BLE advertising.
+     */
+    void startAdvertising();
+
+    /**
+     * @brief Stops BLE advertising.
+     */
+    void stopAdvertising();
+
+    /**
+     * @brief Checks if BLE advertising is currently active.
+     * @return true if advertising is active, false otherwise.
+     */
+    bool isAdvertising() const { return _isAdvertising; }
     
     /**
      * @brief Sends a DGT event as a BLE notification.
@@ -160,7 +176,7 @@ private:
     bool setupBLEServer();
     bool setupDGT3000Service();
     bool setupCharacteristics();
-    bool startAdvertising();
+    bool setupAdvertising();
     
     /**
      * @brief Processes the queue of events coming from the I2C task.

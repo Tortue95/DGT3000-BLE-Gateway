@@ -23,14 +23,13 @@ The gateway exposes a single primary service with several characteristics to han
 ## 3. Communication Flow
 
 ### Initialization Procedure (Client to Gateway)
-To establish a stable and functional connection with the DGT3000 Gateway, the client should follow these steps:
+The connection procedure for a client is now simpler and more reliable.
 
-1.  **Scan and Connect**: Discover BLE devices and connect to the `DGT3000-Gateway` device.
-2.  **Read Protocol Version**: Read the `Protocol Version` characteristic (`...-0001`) to ensure compatibility. The current expected version is `"1.0"`.
-3.  **Subscribe to Events**: Subscribe to notifications on the `Event` characteristic (`...-0003`). This is critical for receiving command responses and asynchronous events.
-4.  **Wait for DGT3000 Configuration**: After subscribing, the gateway will attempt to initialize and configure the physical DGT3000 clock. The client should wait for a `connectionStatus` event with `data.configured: true` to confirm that the DGT3000 clock is ready for commands. This event signifies that the gateway has successfully established I2C communication and configured the clock.
-    *   **Timeout**: It is recommended to implement a timeout (e.g., 7-10 seconds) for this step. If the `configured: true` event is not received within the timeout, the connection should be considered unstable, and the client may attempt to reconnect or inform the user.
-5.  **Ready for Commands**: Once the `connectionStatus` event with `configured: true` is received, the gateway is fully operational, and the client can begin sending commands.
+1.  **Scan and Connect**: Discover and connect to the `DGT3000-Gateway` device.
+    *   **Important**: The gateway will only be discoverable (advertising) after it has successfully connected to the DGT3000 clock. If the gateway is not visible, it means it is still trying to establish a connection with the clock.
+2.  **Read Protocol Version** (Optional but Recommended): Read the `Protocol Version` characteristic (`...-0001`) to ensure compatibility.
+3.  **Subscribe to Events**: Subscribe to notifications on the `Event` characteristic (`...-0003`). This is a mandatory step to receive any data from the gateway.
+4.  **Ready for Commands**: As soon as the client is connected and subscribed, the gateway is guaranteed to be ready. The client can immediately start sending commands. 
 
 ### General Interaction
 The interaction is asynchronous and follows a clear pattern:

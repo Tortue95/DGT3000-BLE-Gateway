@@ -24,11 +24,11 @@
  * @brief Defines the visual states of the status LED.
  */
 enum LedState {
-    LED_STATE_INITIALIZING,           ///< System is starting up. LED is off.
-    LED_STATE_WAITING_FOR_CONNECTION, ///< Waiting for a BLE client. LED is slow blinking blue.
-    LED_STATE_CLIENT_CONNECTED,       ///< A BLE client is connected. LED is solid blue.
-    LED_STATE_DGT_CONFIGURED,         ///< DGT clock is connected and configured. LED is solid green.
-    LED_STATE_OFF                     ///< LED is turned off.
+    LED_STATE_INITIALIZING,                 ///< System is starting up. LED is off.
+    LED_STATE_DGT_CONNECTING,               ///< Trying to connect to DGT3000. Fast blinking blue.
+    LED_STATE_DGT_CONNECTED_BLE_WAITING,    ///< DGT is connected, waiting for a BLE client. Slow blinking blue.
+    LED_STATE_CLIENT_CONNECTED,             ///< DGT and BLE client are connected. Solid green.
+    LED_STATE_OFF                           ///< LED is turned off.
 };
 
 /**

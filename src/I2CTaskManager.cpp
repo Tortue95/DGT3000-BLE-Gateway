@@ -35,8 +35,7 @@ I2CTaskManager::I2CTaskManager(QueueManager* queueMgr, SystemStatus* status)
       _recoveryAttempts(0),
       _connectionStartTime(0),
       _stateMutex(nullptr),
-      _initializingDGT(false),
-      _lastDGTUpdateResult(DGT_SUCCESS)
+      _initializingDGT(false)
 {
     // Initialize all state and monitoring structures.
     _stats = I2CTaskStats();
@@ -196,6 +195,11 @@ bool I2CTaskManager::initializeDGT3000() {
     
     generateConnectionStatusEvent(true, true);
     logI("DGT3000 initialized successfully");
+    
+    if (_dgt3000 && !_bleConnected) {
+        _dgt3000->displayText(" BT   WA|T");
+    }
+    
     _initializingDGT = false;
     return true;
 }
@@ -235,17 +239,16 @@ bool I2CTaskManager::isDGT3000Configured() const {
 // =============================================================================
 
 void I2CTaskManager::onBLEConnected() {
-    logI("BLE connected, initializing DGT3000...");
+    logI("BLE connected.");
     _bleConnected = true;
     
-    if (!initializeDGT3000()) {
-        logE("Failed to initialize DGT3000 on BLE connection");
-        generateErrorEvent(SystemErrorCode::I2C_COMMUNICATION_ERROR, "Failed to initialize DGT3000");
+    if (isDGT3000Connected() && _dgt3000) {
+        _dgt3000->displayText(" Connected ", 1);
     }
 }
 
 void I2CTaskManager::onBLEDisconnected() {
-    logI("BLE disconnected, cleaning up DGT3000...");
+    logI("BLE disconnected, cleaning up DGT3000 and rebooting...");
     _bleConnected = false;
     cleanupDGT3000();
 }
@@ -274,9 +277,15 @@ void I2CTaskManager::runTask() {
         // Main task loop operations
         processCommand();
         if (isDGT3000Connected()) {
+            // If DGT is connected, handle events and monitor the connection.
             handleEvents();
+            monitorConnection();
+        } else {
+            // try to initialize DGT3000
+            if (!initializeDGT3000()) {
+                delayWithYield(1000);
+            }
         }
-        monitorConnection();
         updateStatistics();
         
         // Maintain a consistent update frequency.
@@ -761,9 +770,9 @@ void I2CTaskManager::resetRecoveryState() {
 }
 
 bool I2CTaskManager::shouldAttemptRecovery() const {
-    // Attempt recovery only if DGT is disconnected, BLE is connected,
-    // and no initialization is currently in progress.
-    return !isDGT3000Connected() && _bleConnected && !_initializingDGT && 
+    // Attempt recovery only if DGT is disconnected and no initialization is currently in progress.
+    // The BLE connection status should not prevent DGT recovery.
+    return !isDGT3000Connected() && !_initializingDGT &&
            (I2C_TASK_MAX_RECOVERY_ATTEMPTS == 0 || _recoveryAttempts < I2C_TASK_MAX_RECOVERY_ATTEMPTS);
 }
 

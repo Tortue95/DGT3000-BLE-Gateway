@@ -32,8 +32,8 @@ DGT3000BLEService::DGT3000BLEService(QueueManager* queueMgr, SystemStatus* statu
       protocolVersionCharacteristic(nullptr),
       advertising(nullptr),
       deviceConnected(false),
-      oldDeviceConnected(false),
       connectionTime(0),
+      _isAdvertising(false),
       queueManager(queueMgr),
       systemStatus(status),
       m_cachedStatusJson("")
@@ -54,7 +54,7 @@ bool DGT3000BLEService::initialize() {
     BLEDevice::init(BLE_DEVICE_NAME);
     logD("BLE Device initialized: %s", BLE_DEVICE_NAME);
     
-    if (!setupBLEServer() || !setupDGT3000Service() || !setupCharacteristics() || !startAdvertising()) {
+    if (!setupBLEServer() || !setupDGT3000Service() || !setupCharacteristics() || !setupAdvertising()) {
         logE("Failed to initialize BLE stack");
         cleanup();
         return false;
@@ -73,9 +73,7 @@ bool DGT3000BLEService::initialize() {
 void DGT3000BLEService::cleanup() {
     logI("Cleaning up BLE Service...");
     
-    if (advertising) {
-        BLEDevice::stopAdvertising();
-    }
+    stopAdvertising();
     
     // unique_ptr automatically handles deletion of callback objects.
     _serverCallbacks.reset();
@@ -88,7 +86,6 @@ void DGT3000BLEService::cleanup() {
     BLEDevice::deinit(false);
     
     deviceConnected = false;
-    oldDeviceConnected = false;
     
     logI("BLE Service cleanup complete");
 }
@@ -152,7 +149,7 @@ bool DGT3000BLEService::setupCharacteristics() {
     return true;
 }
 
-bool DGT3000BLEService::startAdvertising() {
+bool DGT3000BLEService::setupAdvertising() {
     advertising = BLEDevice::getAdvertising();
     if (!advertising) {
         logE("Failed to get BLE Advertising instance");
@@ -162,10 +159,24 @@ bool DGT3000BLEService::startAdvertising() {
     advertising->addServiceUUID(BLE_DGT3000_SERVICE_UUID);
     advertising->setScanResponse(false);
     advertising->setMinPreferred(0x0); // General discoverable mode
-    
-    BLEDevice::startAdvertising();
-    logI("BLE Advertising started. Device discoverable as '%s'", BLE_DEVICE_NAME);
+    logD("BLE Advertising configured.");
     return true;
+}
+
+void DGT3000BLEService::startAdvertising() {
+    if (advertising && !_isAdvertising) {
+        advertising->start();
+        _isAdvertising = true;
+        logI("BLE Advertising started. Device discoverable as '%s'", BLE_DEVICE_NAME);
+    }
+}
+
+void DGT3000BLEService::stopAdvertising() {
+    if (advertising && _isAdvertising) {
+        advertising->stop();
+        _isAdvertising = false;
+        logI("BLE Advertising stopped.");
+    }
 }
 
 void DGT3000BLEService::processEvents() {

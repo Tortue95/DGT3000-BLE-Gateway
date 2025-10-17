@@ -16,9 +16,8 @@
 using namespace esp32m;
 
 // Constants for LED behavior
-#define BLINK_INTERVAL_SLOW 500 // Slow blink interval for simple LED (ms)
-#define BLINK_INTERVAL_FAST 250  // Fast blink interval for simple LED (ms)
-#define NEOPIXEL_BLINK_INTERVAL 500 // Blink interval for NeoPixel (ms)
+#define BLINK_INTERVAL_SLOW 600 // Slow blink interval for simple LED (ms)
+#define BLINK_INTERVAL_FAST 190  // Fast blink interval for simple LED (ms)
 
 // Define colors in GRB format (as required by NeoPixel library)
 static constexpr uint32_t COLOR_BLUE  = 0x0000FF;
@@ -75,7 +74,7 @@ void LedManager::initialize() {
         logI("Simple LED is disabled.");
     }
     
-    setState(LED_STATE_WAITING_FOR_CONNECTION);
+    setState(LED_STATE_DGT_CONNECTING);
     logD("LED Manager initialized");
 }
 
@@ -110,9 +109,18 @@ void LedManager::updateNeoPixel() {
     uint32_t color = COLOR_OFF;
 
     switch (current_state) {
-        case LED_STATE_WAITING_FOR_CONNECTION:
+        case LED_STATE_DGT_CONNECTING:
+            // Fast blinking blue
+            if (current_millis - neopixel_last_update > BLINK_INTERVAL_FAST) {
+                neopixel_last_update = current_millis;
+                neopixel_blink_status = !neopixel_blink_status;
+            }
+            color = neopixel_blink_status ? COLOR_BLUE : COLOR_OFF;
+            break;
+        
+        case LED_STATE_DGT_CONNECTED_BLE_WAITING:
             // Slow blinking blue
-            if (current_millis - neopixel_last_update > NEOPIXEL_BLINK_INTERVAL) {
+            if (current_millis - neopixel_last_update > BLINK_INTERVAL_SLOW) {
                 neopixel_last_update = current_millis;
                 neopixel_blink_status = !neopixel_blink_status;
             }
@@ -120,11 +128,6 @@ void LedManager::updateNeoPixel() {
             break;
 
         case LED_STATE_CLIENT_CONNECTED:
-            // Solid blue
-            color = COLOR_BLUE;
-            break;
-
-        case LED_STATE_DGT_CONFIGURED:
             {
                 // Solid green with adjusted brightness
                 uint8_t green_value = 255 * (static_cast<float>(CONNECTED_STATE_BRIGHTNESS_PERCENT) / 100.0f);
@@ -151,17 +154,17 @@ void LedManager::updateSimpleLed() {
     int blink_interval = 0;
 
     switch (current_state) {
-        case LED_STATE_WAITING_FOR_CONNECTION:
+        case LED_STATE_DGT_CONNECTING:
+            // Fast blinking
+            blink_interval = BLINK_INTERVAL_FAST;
+            break;
+
+        case LED_STATE_DGT_CONNECTED_BLE_WAITING:
             // Slow blinking
             blink_interval = BLINK_INTERVAL_SLOW;
             break;
 
         case LED_STATE_CLIENT_CONNECTED:
-            // Fast blinking
-            blink_interval = BLINK_INTERVAL_FAST;
-            break;
-
-        case LED_STATE_DGT_CONFIGURED:
             // Solid on with specified brightness
             ledcWrite(SIMPLE_LED_PWM_CHANNEL, simple_led_connected_duty_cycle);
             return; // Exit, no blinking logic needed

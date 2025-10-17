@@ -161,7 +161,6 @@ void cleanupSystem() {
 void onBLEConnected() {
     log_i("BLE Client connected");
     
-    if (g_ledManager) g_ledManager->setState(LED_STATE_CLIENT_CONNECTED);
     if (g_i2cTaskManager) g_i2cTaskManager->onBLEConnected();
     
     g_systemStatus.systemState = SystemState::ACTIVE;
@@ -174,7 +173,6 @@ void onBLEConnected() {
 void onBLEDisconnected() {
     log_i("BLE Client disconnected. Rebooting system...");
     
-    if (g_ledManager) g_ledManager->setState(LED_STATE_WAITING_FOR_CONNECTION);
     if (g_i2cTaskManager) g_i2cTaskManager->onBLEDisconnected();
     
     g_systemStatus.systemState = SystemState::IDLE;
@@ -195,16 +193,31 @@ void processSystemTasks() {
     g_systemStatus.updateUptime();
     
     if (g_bleService) g_bleService->processEvents();
+
+    // Control BLE advertising based on DGT connection status.
+    if (g_i2cTaskManager && g_i2cTaskManager->isDGT3000Connected()) {
+        // If DGT is connected, start advertising so a client can connect.
+        if (g_bleService && !g_bleService->isAdvertising()) {
+            g_bleService->startAdvertising();
+        }
+    } else {
+        // If DGT is not connected, stop advertising.
+        if (g_bleService && g_bleService->isAdvertising()) {
+            g_bleService->stopAdvertising();
+        }
+    }
     
     // Update the LED status based on the system state.
     if (g_ledManager) {
-        LedState newState = LED_STATE_WAITING_FOR_CONNECTION; // Default: waiting for BLE
-        if (g_bleService && g_bleService->isConnected()) {
-            newState = LED_STATE_CLIENT_CONNECTED; // Blue: BLE connected
-            if (g_i2cTaskManager && g_i2cTaskManager->isDGT3000Connected()) {
-                newState = LED_STATE_DGT_CONFIGURED; // Green: DGT is also ready
+        LedState newState = LED_STATE_DGT_CONNECTING;
+        
+        if (g_i2cTaskManager && g_i2cTaskManager->isDGT3000Connected()) {
+            newState = LED_STATE_DGT_CONNECTED_BLE_WAITING;
+            if (g_bleService && g_bleService->isConnected()) {
+                newState = LED_STATE_CLIENT_CONNECTED;
             }
         }
+        
         g_ledManager->setState(newState);
         g_ledManager->update();
     }

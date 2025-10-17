@@ -46,7 +46,7 @@
 #define DGT3000_ACK_TIMEOUT_MS          50  ///< Timeout for waiting for an ACK from the clock.
 #define DGT3000_RETRY_DELAY_MS          100 ///< Delay between command retries.
 #define DGT3000_ADDRESS_SWITCH_DELAY_MS 10  ///< Delay for I2C slave address switching.
-#define DGT3000_COMMAND_DELAY_MS        5   ///< Delay between sending configuration commands.
+#define DGT3000_COMMAND_DELAY_MS        25   ///< Delay between sending configuration commands.
 
 // Error codes
 enum DGTError {
