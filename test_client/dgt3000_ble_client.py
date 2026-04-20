@@ -100,10 +100,10 @@ class DGT3000BLEClient:
             console.print("[blue]Check protocol version...[/blue]")
             try:
                 protocol_version = await self.get_protocol_version()
-                if protocol_version == "1.0":
-                    console.print(f"[green]✅ Protocol version (v{protocol_version}) is 1.0. Client is compatible.[/green]")
+                if protocol_version == "1.1":
+                    console.print(f"[green]✅ Protocol version (v{protocol_version}) is 1.1. Client is compatible.[/green]")
                 else:
-                    console.print(f"[red]❌ Protocol version (v{protocol_version}) is not 1.0. Client might be incompatible.[/red]")
+                    console.print(f"[red]❌ Protocol version (v{protocol_version}) is not 1.1. Client might be incompatible.[/red]")
             except Exception as e:
                 console.print(f"[red]Error verifying protocol version: {e}[/red]")
 

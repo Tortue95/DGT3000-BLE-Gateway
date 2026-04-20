@@ -90,12 +90,12 @@ constexpr int CONNECTED_STATE_BRIGHTNESS_PERCENT = 25;
 /**
  * @brief Current version of the BLE communication protocol.
  */
-constexpr const char* BLE_PROTOCOL_VERSION = "1.0";
+constexpr const char* BLE_PROTOCOL_VERSION = "1.1";
 
 /**
  * @brief Current version of the DGT3000 BLE Gateway application.
  */
-constexpr const char* GATEWAY_APP_VERSION = "0.5beta";
+constexpr const char* GATEWAY_APP_VERSION = "0.6beta";
 
 // =============================================================================
 // BLE SERVICE AND CHARACTERISTIC UUIDS

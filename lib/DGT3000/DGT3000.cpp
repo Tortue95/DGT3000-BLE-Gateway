@@ -522,7 +522,18 @@ bool DGT3000::setAndRun(uint8_t leftMode, uint8_t leftHours, uint8_t leftMinutes
     
     // old command with ACK:
     // return sendDGTCommand("Set And Run", setAndRunCmd, sizeof(setAndRunCmd), DGT3000_ESP_ADDR_10, DGT_CMD_SET_AND_RUN);
-    return sendDGTCommand("Set And Run", setAndRunCmd, sizeof(setAndRunCmd), DGT3000_ESP_ADDR_00, DGT_CMD_SET_AND_RUN, 0);
+    bool success = sendDGTCommand("Set And Run", setAndRunCmd, sizeof(setAndRunCmd), DGT3000_ESP_ADDR_00, DGT_CMD_SET_AND_RUN, 0);
+    
+    if (success) {
+        _rxData.time[0] = leftHours;
+        _rxData.time[1] = leftMinutes;
+        _rxData.time[2] = leftSeconds;
+        _rxData.time[3] = rightHours;
+        _rxData.time[4] = rightMinutes;
+        _rxData.time[5] = rightSeconds;
+    }
+    
+    return success;
 }
 
 bool DGT3000::stop() {

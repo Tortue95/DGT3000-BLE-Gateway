@@ -54,7 +54,7 @@ The firmware provides two configurable options for visual status feedback, which
 
 The onboard NeoPixel LED provides at-a-glance, color-coded feedback of the gateway's current status:
 
--   **Fast Blinking Blue**: The gateway is trying to connect to the DGT3000 clock. BLE advertising is off.
+-   **Fast Blinking Orange**: The gateway is trying to connect to the DGT3000 clock. BLE advertising is off.
 -   **Slow Blinking Blue**: The gateway is connected to the DGT3000 and is now advertising, waiting for a BLE client to connect.
 -   **Solid Green (Brightness-Adjustable)**: All systems are go. A BLE client is connected, and the gateway has full control over the DGT3000 clock. The system is ready for commands.
 

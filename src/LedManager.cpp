@@ -20,6 +20,7 @@ using namespace esp32m;
 #define BLINK_INTERVAL_FAST 190  // Fast blink interval for simple LED (ms)
 
 // Define colors in GRB format (as required by NeoPixel library)
+static constexpr uint32_t COLOR_ORANGE= 0xFF3000;
 static constexpr uint32_t COLOR_BLUE  = 0x0000FF;
 static constexpr uint32_t COLOR_GREEN = 0x00FF00;
 static constexpr uint32_t COLOR_OFF   = 0x000000;
@@ -110,12 +111,12 @@ void LedManager::updateNeoPixel() {
 
     switch (current_state) {
         case LED_STATE_DGT_CONNECTING:
-            // Fast blinking blue
+            // Fast blinking orange
             if (current_millis - neopixel_last_update > BLINK_INTERVAL_FAST) {
                 neopixel_last_update = current_millis;
                 neopixel_blink_status = !neopixel_blink_status;
             }
-            color = neopixel_blink_status ? COLOR_BLUE : COLOR_OFF;
+            color = neopixel_blink_status ? COLOR_ORANGE : COLOR_OFF;
             break;
         
         case LED_STATE_DGT_CONNECTED_BLE_WAITING:

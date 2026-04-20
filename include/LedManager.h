@@ -25,7 +25,7 @@
  */
 enum LedState {
     LED_STATE_INITIALIZING,                 ///< System is starting up. LED is off.
-    LED_STATE_DGT_CONNECTING,               ///< Trying to connect to DGT3000. Fast blinking blue.
+    LED_STATE_DGT_CONNECTING,               ///< Trying to connect to DGT3000. Fast blinking orange.
     LED_STATE_DGT_CONNECTED_BLE_WAITING,    ///< DGT is connected, waiting for a BLE client. Slow blinking blue.
     LED_STATE_CLIENT_CONNECTED,             ///< DGT and BLE client are connected. Solid green.
     LED_STATE_OFF                           ///< LED is turned off.
