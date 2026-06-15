@@ -1,5 +1,12 @@
 # DGT3000 BLE Gateway
 
+**More informations and tutorial here:  [https://dgt3000-gw.tednet.fr/](https://dgt3000-gw.tednet.fr/)**
+
+If you are unable to build the gateway yourself, I occasionally offer functional units on eBay.  
+You can check availability on my profile: https://www.ebay.fr/usr/tortue95
+
+## Presentation
+
 This project implements a Bluetooth Low Energy (BLE) gateway for the DGT3000 chess clock, built for the ESP32 platform. It acts as a bridge, allowing a BLE client (such as a mobile/pc application) to communicate with and control a DGT3000 clock using a simple, JSON-based protocol.
 
 This gateway handles the complex dual-I2C communication required by the clock and exposes a clean, modern BLE interface.
